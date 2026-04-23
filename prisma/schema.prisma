@@ -24,6 +24,16 @@ enum AppointmentStatus {
   COMPLETED
 }
 
+enum RoomType {
+  ICU
+  GENERAL
+}
+
+enum RoomStatus {
+  OCCUPIED
+  VACANT
+}
+
 model User {
   id             String          @id @default(uuid())
   email          String          @unique
@@ -43,6 +53,7 @@ model PatientProfile {
   gender         Gender
   medicalHistory String        @db.Text
   appointments   Appointment[]
+  room           Room?
 }
 
 model DoctorProfile {
@@ -68,4 +79,15 @@ model Appointment {
   @@index([patientId])
   @@index([doctorId])
   @@index([date])
+}
+
+model Room {
+  id        String        @id @default(uuid())
+  type      RoomType
+  status    RoomStatus    @default(VACANT)
+  patientId String?       @unique
+  patient   PatientProfile? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([type])
 }
