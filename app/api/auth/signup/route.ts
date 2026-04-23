@@ -5,19 +5,27 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
 const signupSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().email("Valid email is required."),
   password: z.string().min(8, "Password must be at least 8 characters."),
-  role: z.enum(["ADMIN", "DOCTOR", "PATIENT"]),
+  // Role is optional at signup; defaults to PATIENT for safer onboarding.
+  role: z
+    .preprocess(
+      (value) => (typeof value === "string" ? value.toUpperCase().trim() : value),
+      z.enum(["ADMIN", "DOCTOR", "PATIENT"]),
+    )
+    .optional()
+    .default("PATIENT"),
 });
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as unknown;
     const result = signupSchema.safeParse(body);
 
     if (!result.success) {
+      const firstIssue = result.error.issues[0]?.message ?? "Invalid payload.";
       return NextResponse.json(
-        { message: "Invalid payload.", errors: result.error.flatten() },
+        { message: firstIssue, errors: result.error.flatten() },
         { status: 400 },
       );
     }
