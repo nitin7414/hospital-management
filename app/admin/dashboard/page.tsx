@@ -1,3 +1,4 @@
+<<<<<<< codex/set-up-initial-project-structure-m7wvqv
 import { subDays } from "date-fns";
 
 import { AppointmentsTrendChart } from "@/components/admin/charts";
@@ -44,4 +45,8 @@ export default async function AdminDashboardOverviewPage() {
       <AppointmentsTrendChart data={trend} />
     </div>
   );
+=======
+export default function AdminDashboardPlaceholder() {
+  return <main className="p-8 text-xl font-semibold">Admin Dashboard (Placeholder)</main>;
+>>>>>>> main
 }
