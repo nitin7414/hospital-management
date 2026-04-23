@@ -20,7 +20,9 @@
     "zod": "latest",
     "@prisma/adapter-pg": "latest",
     "pg": "latest",
-    "nodemailer": "latest"
+    "nodemailer": "latest",
+    "recharts": "latest",
+    "date-fns": "latest"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "latest",
