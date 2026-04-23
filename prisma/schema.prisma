@@ -61,6 +61,7 @@ model Appointment {
   doctorId  String
   date      DateTime
   status    AppointmentStatus @default(PENDING)
+  notes     String?           @db.Text
 
   patient PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
   doctor  DoctorProfile  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
