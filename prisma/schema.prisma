@@ -34,6 +34,11 @@ enum RoomStatus {
   VACANT
 }
 
+enum InvoiceStatus {
+  PAID
+  UNPAID
+}
+
 model User {
   id             String          @id @default(uuid())
   email          String          @unique
@@ -54,6 +59,7 @@ model PatientProfile {
   medicalHistory String        @db.Text
   appointments   Appointment[]
   room           Room?
+  invoices       Invoice[]
 }
 
 model DoctorProfile {
@@ -73,6 +79,7 @@ model Appointment {
   status    AppointmentStatus @default(PENDING)
   notes         String?         @db.Text
   prescriptions Prescription[]
+  invoice       Invoice?
 
   patient PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
   doctor  DoctorProfile  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
@@ -105,6 +112,23 @@ model Prescription {
 
   @@index([appointmentId])
   @@index([medicineId])
+}
+
+
+model Invoice {
+  id            String        @id @default(uuid())
+  patientId     String
+  appointmentId String        @unique
+  amount        Decimal       @db.Decimal(10, 2)
+  status        InvoiceStatus @default(UNPAID)
+  createdAt     DateTime      @default(now())
+
+  patient     PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointment Appointment    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Room {

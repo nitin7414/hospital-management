@@ -1,3 +1,4 @@
+import { GenerateInvoiceForm } from "@/components/billing/generate-invoice-form";
 import { AppointmentNotesForm } from "@/components/doctors/appointment-notes-form";
 import { AddPrescriptionForm } from "@/components/pharmacy/add-prescription-form";
 import { requireRole } from "@/lib/auth/role";
@@ -88,6 +89,8 @@ export default async function DoctorDashboardPage() {
               <AppointmentNotesForm appointmentId={appointment.id} initialNotes={appointment.notes} />
 
               <AddPrescriptionForm appointmentId={appointment.id} medicines={medicines} />
+
+              <GenerateInvoiceForm appointmentId={appointment.id} />
 
               {appointment.prescriptions.length > 0 ? (
                 <div className="mt-3">
