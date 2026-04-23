@@ -4,6 +4,8 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import { ErrorAlert } from "@/components/ui/error-alert";
+
 const roles = ["ADMIN", "DOCTOR", "PATIENT"] as const;
 
 export default function SignupPage() {
@@ -23,22 +25,26 @@ export default function SignupPage() {
       role: String(formData.get("role") ?? "PATIENT"),
     };
 
-    const response = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    const data = (await response.json()) as { message?: string };
+      const data = (await response.json()) as { message?: string };
 
-    setIsLoading(false);
+      if (!response.ok) {
+        setError(data.message ?? "Unable to create account.");
+        return;
+      }
 
-    if (!response.ok) {
-      setError(data.message ?? "Unable to create account.");
-      return;
+      router.push("/login?registered=1");
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    router.push("/login?registered=1");
   }
 
   return (
@@ -93,7 +99,7 @@ export default function SignupPage() {
             </select>
           </div>
 
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          {error ? <ErrorAlert message={error} /> : null}
 
           <button
             type="submit"

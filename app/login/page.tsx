@@ -3,6 +3,8 @@
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
@@ -19,20 +21,24 @@ export default function LoginPage() {
     const email = String(formData.get("email") ?? "");
     const password = String(formData.get("password") ?? "");
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    setIsLoading(false);
+      if (result?.error) {
+        setError("Invalid email or password.");
+        return;
+      }
 
-    if (result?.error) {
-      setError("Invalid email or password.");
-      return;
+      window.location.href = "/auth/redirect";
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    window.location.href = "/auth/redirect";
   }
 
   return (
@@ -74,7 +80,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          {error ? <ErrorAlert message={error} /> : null}
 
           <button
             type="submit"

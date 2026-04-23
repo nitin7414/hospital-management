@@ -19,7 +19,8 @@
     "react-dom": "latest",
     "zod": "latest",
     "@prisma/adapter-pg": "latest",
-    "pg": "latest"
+    "pg": "latest",
+    "nodemailer": "latest"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "latest",
@@ -31,6 +32,7 @@
     "prisma": "latest",
     "tailwindcss": "latest",
     "typescript": "latest",
-    "dotenv": "latest"
+    "dotenv": "latest",
+    "@types/nodemailer": "latest"
   }
 }

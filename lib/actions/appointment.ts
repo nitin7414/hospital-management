@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/auth/role";
+import { sendEmail } from "@/lib/notifications/email";
 import { prisma } from "@/lib/prisma";
 import { appointmentBookingSchema } from "@/lib/validations/appointment";
 
@@ -65,13 +66,41 @@ export async function bookAppointmentAction(
       };
     }
 
-    await prisma.appointment.create({
+    const appointment = await prisma.appointment.create({
       data: {
         patientId: patientProfile.id,
         doctorId: doctorProfile.id,
         date: appointmentDate,
         status: "PENDING",
       },
+      include: {
+        patient: {
+          include: {
+            user: {
+              select: { email: true },
+            },
+          },
+        },
+        doctor: {
+          include: {
+            user: {
+              select: { email: true },
+            },
+          },
+        },
+      },
+    });
+
+    await sendEmail({
+      to: appointment.patient.user.email,
+      subject: "Appointment Booked",
+      text: `Your appointment is booked for ${appointment.date.toLocaleString()}.`,
+    });
+
+    await sendEmail({
+      to: appointment.doctor.user.email,
+      subject: "New Appointment Assigned",
+      text: `A new appointment is scheduled for ${appointment.date.toLocaleString()}.`,
     });
 
     revalidatePath("/patient/appointments");
