@@ -17,7 +17,9 @@
     "next-auth": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "zod": "latest"
+    "zod": "latest",
+    "@prisma/adapter-pg": "latest",
+    "pg": "latest"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "latest",
@@ -28,6 +30,7 @@
     "eslint-config-next": "latest",
     "prisma": "latest",
     "tailwindcss": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "dotenv": "latest"
   }
 }
