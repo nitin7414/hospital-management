@@ -12,11 +12,15 @@
   },
   "dependencies": {
     "@prisma/client": "latest",
+    "bcryptjs": "latest",
     "next": "latest",
+    "next-auth": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "zod": "latest"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
@@ -24,7 +28,6 @@
     "eslint-config-next": "latest",
     "prisma": "latest",
     "tailwindcss": "latest",
-    "typescript": "latest",
-    "@tailwindcss/postcss": "latest"
+    "typescript": "latest"
   }
 }
