@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+}
+
+enum RoomType {
+  ICU
+  GENERAL
+}
+
+enum RoomStatus {
+  OCCUPIED
+  VACANT
+}
+
+enum InvoiceStatus {
+  PAID
+  UNPAID
+}
+
+model User {
+  id             String          @id @default(uuid())
+  email          String          @unique
+  password       String
+  role           Role            @default(PATIENT)
+  createdAt      DateTime        @default(now())
+  patientProfile PatientProfile?
+  doctorProfile  DoctorProfile?
+}
+
+model PatientProfile {
+  id             String        @id @default(uuid())
+  userId         String        @unique
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  age            Int
+  gender         Gender
+  medicalHistory String        @db.Text
+  appointments   Appointment[]
+  room           Room?
+  invoices       Invoice[]
+}
+
+model DoctorProfile {
+  id              String        @id @default(uuid())
+  userId          String        @unique
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialization  String
+  experienceYears Int
+  appointments    Appointment[]
+}
+
+model Appointment {
+  id        String            @id @default(uuid())
+  patientId String
+  doctorId  String
+  date      DateTime
+  status    AppointmentStatus @default(PENDING)
+  reminderSent Boolean         @default(false)
+  notes         String?         @db.Text
+  prescriptions Prescription[]
+  invoice       Invoice?
+
+  patient PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor  DoctorProfile  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([date])
+}
+
+
+model Medicine {
+  id            String         @id @default(uuid())
+  name          String         @unique
+  stock         Int
+  price         Decimal        @db.Decimal(10, 2)
+  prescriptions Prescription[]
+
+  @@index([name])
+}
+
+model Prescription {
+  id            String      @id @default(uuid())
+  appointmentId String
+  medicineId    String
+  quantity      Int         @default(1)
+  createdAt     DateTime    @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  medicine    Medicine    @relation(fields: [medicineId], references: [id], onDelete: Restrict)
+
+  @@index([appointmentId])
+  @@index([medicineId])
+}
+
+
+model Invoice {
+  id            String        @id @default(uuid())
+  patientId     String
+  appointmentId String        @unique
+  amount        Decimal       @db.Decimal(10, 2)
+  status        InvoiceStatus @default(UNPAID)
+  createdAt     DateTime      @default(now())
+
+  patient     PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointment Appointment    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Room {
+  id        String        @id @default(uuid())
+  type      RoomType
+  status    RoomStatus    @default(VACANT)
+  patientId String?       @unique
+  patient   PatientProfile? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([type])
+}
