@@ -1,4 +1,5 @@
 import { AppointmentNotesForm } from "@/components/doctors/appointment-notes-form";
+import { AddPrescriptionForm } from "@/components/pharmacy/add-prescription-form";
 import { requireRole } from "@/lib/auth/role";
 import { prisma } from "@/lib/prisma";
 
@@ -17,8 +18,8 @@ export default async function DoctorDashboardPage() {
   const endOfDay = new Date(now);
   endOfDay.setHours(23, 59, 59, 999);
 
-  const appointments = doctor
-    ? await prisma.appointment.findMany({
+  const [appointments, medicines] = doctor
+    ? await Promise.all([prisma.appointment.findMany({
         where: {
           doctorId: doctor.id,
           date: {
@@ -36,12 +37,25 @@ export default async function DoctorDashboardPage() {
               },
             },
           },
+          prescriptions: {
+            include: {
+              medicine: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
         },
         orderBy: {
           date: "asc",
         },
-      })
-    : [];
+      }), prisma.medicine.findMany({
+        where: { stock: { gt: 0 } },
+        select: { id: true, name: true, stock: true },
+        orderBy: { name: "asc" },
+      })])
+    : [[], []];
 
   return (
     <main className="mx-auto max-w-5xl p-6">
@@ -72,6 +86,21 @@ export default async function DoctorDashboardPage() {
               </p>
 
               <AppointmentNotesForm appointmentId={appointment.id} initialNotes={appointment.notes} />
+
+              <AddPrescriptionForm appointmentId={appointment.id} medicines={medicines} />
+
+              {appointment.prescriptions.length > 0 ? (
+                <div className="mt-3">
+                  <p className="mb-1 text-sm font-medium">Prescriptions</p>
+                  <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
+                    {appointment.prescriptions.map((prescription) => (
+                      <li key={prescription.id}>
+                        {prescription.medicine.name} × {prescription.quantity}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </div>
           </details>
         ))}
